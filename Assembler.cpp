@@ -36,6 +36,48 @@ unordered_map<string, string> registers = {
     {"x31","11111"}
 };
 
+string hexDigitToBinary(char hexDigit) {
+    switch (toupper(hexDigit)) {
+        case '0': return "0000";
+        case '1': return "0001";
+        case '2': return "0010";
+        case '3': return "0011";
+        case '4': return "0100";
+        case '5': return "0101";
+        case '6': return "0110";
+        case '7': return "0111";
+        case '8': return "1000";
+        case '9': return "1001";
+        case 'A': return "1010";
+        case 'B': return "1011";
+        case 'C': return "1100";
+        case 'D': return "1101";
+        case 'E': return "1110";
+        case 'F': return "1111";
+        default: return "";
+    }
+}
+
+string hexToBin(const string hex) {
+    string binary = "";
+    for (char hexDigit : hex) {
+        string bin = hexDigitToBinary(hexDigit);
+        if (!bin.empty()) {
+            binary += bin;
+        } else {
+            cerr << "Invalid hexadecimal digit: " << hexDigit << std::endl;
+            return "";
+        }
+    }
+    int hexSize = hex.size();
+    if(hexSize == 1){
+        binary = "00000000" + binary;
+    }
+    else if(hexSize == 2){
+        binary = "0000" + binary;
+    }
+    return binary;
+}
 
 class R{
 private:
@@ -58,9 +100,9 @@ public:
         this->rd = inst_break[1];
         this->rs1 = inst_break[2];
         this->rs2 = inst_break[3];
+
         rd = rd.substr(0, rd.find(','));
         rs1 = rs1.substr(0, rs1.find(','));
-        rs2 = rs2.substr(0, rs2.find(','));
 
         rd = findRegister(rd);
         rs1 = findRegister(rs1);
@@ -78,7 +120,7 @@ public:
 
 class I{
 private:
-    string opcode = "0110011", rd, func3, rs1, rs2, func7;
+    string opcode = "0110011", rd, func3, rs1, imm;
     string machineCode;
 
     string findRegister(string s){
@@ -88,25 +130,25 @@ private:
         return "-1";
     }
     void joinCodes(){
-        cout << func7 << " " << rs2 << " " << rs1 << " " << func3 << " " << rd << " " << opcode << endl;
-        machineCode = func7 + rs2 + rs1 + func3 + rd + opcode;
+        cout << imm << " " << rs1 << " " << func3 << " " << rd << " " << opcode << endl;
+        machineCode = imm + rs1 + func3 + rd + opcode;
     }
 
 public:
     I (vector<string> inst_break, vector<string> modeAndFunc) {
         this->rd = inst_break[1];
         this->rs1 = inst_break[2];
-        this->rs2 = inst_break[3];
+        this->imm = inst_break[3];
+
         rd = rd.substr(0, rd.find(','));
         rs1 = rs1.substr(0, rs1.find(','));
-        rs2 = rs2.substr(0, rs2.find(','));
 
         rd = findRegister(rd);
         rs1 = findRegister(rs1);
-        rs2 = findRegister(rs2);
+
+        imm = hexToBin(imm);
 
         this->func3 = modeAndFunc[1];
-        this->func7 = modeAndFunc[2];
         joinCodes();
     }
 
