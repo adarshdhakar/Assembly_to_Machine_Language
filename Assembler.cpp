@@ -324,6 +324,7 @@ private:
         }
         return {""};
     }
+    
 public:
    Assembler() {
     // R-type instructions
@@ -340,18 +341,20 @@ public:
     
     // I-type instructions
     functions["jalr"] = {"I", "000", ""};  // Jump and Link Register
-    functions["lb"] = {"I", "000", ""};    // Load Byte
-    functions["lh"] = {"I", "001", ""};    // Load Halfword
-    functions["lw"] = {"I", "010", ""};    // Load Word
-    functions["lbu"] = {"I", "100", ""};   // Load Byte Unsigned
-    functions["lhu"] = {"I", "101", ""};   // Load Halfword Unsigned
     functions["addi"] = {"I", "000", ""};  // Add Immediate
     functions["slti"] = {"I", "010", ""};  // Set Less Than Immediate
     functions["sltiu"] = {"I", "011", ""}; // Set Less Than Immediate Unsigned
     functions["xori"] = {"I", "100", ""};  // XOR Immediate
     functions["ori"] = {"I", "110", ""};   // OR Immediate
     functions["andi"] = {"I", "111", ""};  // AND Immediate
-    
+
+    // I-type Load instructions
+    functions["lb"] = {"I", "000", ""};    // Load Byte
+    functions["lh"] = {"I", "001", ""};    // Load Halfword
+    functions["lw"] = {"I", "010", ""};    // Load Word
+    functions["lbu"] = {"I", "100", ""};   // Load Byte Unsigned
+    functions["lhu"] = {"I", "101", ""};   // Load Halfword Unsigned
+
     // S-type instructions
     functions["sb"] = {"S", "000", ""};    // Store Byte
     functions["sh"] = {"S", "001", ""};    // Store Halfword
