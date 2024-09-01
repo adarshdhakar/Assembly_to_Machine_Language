@@ -2,39 +2,103 @@
 using namespace std;
 
 map<string, int> labels;
+unordered_map<string, vector<string>> functions; // {func, {addMode, func3, func7}}
+
+void addRTypeInstructions() {
+    functions["add"] = {"R", "000", "0000000"};
+    functions["sub"] = {"R", "000", "0100000"};
+    functions["sll"] = {"R", "001", "0000000"};
+    functions["slt"] = {"R", "010", "0000000"};
+    functions["sltu"] = {"R", "011", "0000000"};
+    functions["xor"] = {"R", "100", "0000000"};
+    functions["srl"] = {"R", "101", "0000000"};
+    functions["sra"] = {"R", "101", "0100000"};
+    functions["or"] = {"R", "110", "0000000"};
+    functions["and"] = {"R", "111", "0000000"};
+}
+
+void addITypeInstructions() {
+    functions["jalr"] = {"I", "000"};
+    functions["addi"] = {"I", "000"};
+    functions["slti"] = {"I", "010"};
+    functions["sltiu"] = {"I", "011"};
+    functions["xori"] = {"I", "100"};
+    functions["ori"] = {"I", "110"};
+    functions["andi"] = {"I", "111"};
+    functions["lb"] = {"I", "000"};
+    functions["lh"] = {"I", "001"};
+    functions["lw"] = {"I", "010"};
+    functions["lbu"] = {"I", "100"};
+    functions["lhu"] = {"I", "101"};
+}
+
+void addSTypeInstructions() {
+    functions["sb"] = {"S", "000"};
+    functions["sh"] = {"S", "001"};
+    functions["sw"] = {"S", "010"};
+}
+
+void addBTypeInstructions() {
+    functions["beq"] = {"B", "000"};
+    functions["bne"] = {"B", "001"};
+    functions["blt"] = {"B", "100"};
+    functions["bge"] = {"B", "101"};
+    functions["bltu"] = {"B", "110"};
+    functions["bgeu"] = {"B", "111"};
+}
+
+void addUTypeInstructions() {
+    functions["lui"] = {"U"};
+    functions["auipc"] = {"U"};
+}
+
+void addJTypeInstructions() {
+    functions["jal"] = {"J"};
+}
+
+void initializeFunctions() {
+    addRTypeInstructions();
+    addITypeInstructions();
+    addSTypeInstructions();
+    addBTypeInstructions();
+    addUTypeInstructions();
+    addJTypeInstructions();
+}
+
 unordered_map<string, string> registers = {
-    {"x0", "00000"},
-    {"x1", "00001"},
-    {"x2", "00010"},
-    {"x3", "00011"},
-    {"x4", "00100"},
-    {"x5", "00101"},
-    {"x6", "00110"},
-    {"x7", "00111"},
-    {"x8", "01000"},
-    {"x9", "01001"},
-    {"x10","01010"},
-    {"x11","01011"},
-    {"x12","01100"},
-    {"x13","01101"},
-    {"x14","01110"},
-    {"x15","01111"},
-    {"x16","10000"},
-    {"x17","10001"},
-    {"x18","10010"},
-    {"x19","10011"},
-    {"x20","10100"},
-    {"x21","10101"},
-    {"x22","10110"},
-    {"x23","10111"},
-    {"x24","11000"},
-    {"x25","11001"},
-    {"x26","11010"},
-    {"x27","11011"},
-    {"x28","11100"},
-    {"x29","11101"},
-    {"x30","11110"},
-    {"x31","11111"}
+    {"zero","x0"},
+    {"ra","x1"},
+    {"sp","x2"},
+    {"gp","x3"},
+    {"tp","x4"},
+    {"t0","x5"},
+    {"t1","x6"},
+    {"t2","x7"},
+    {"s0","x8"},
+    {"fp","x8"},
+    {"s1","x9"},
+    {"a0","x10"},
+    {"a1","x11"},
+    {"a2","x12"},
+    {"a3","x13"},
+    {"a4","x14"},
+    {"a5","x15"},
+    {"a6","x16"},
+    {"a7","x17"},
+    {"s2","x18"},
+    {"s3","x19"},
+    {"s4","x20"},
+    {"s5","x21"},
+    {"s6","x22"},
+    {"s7","x23"},
+    {"s8","x24"},
+    {"s9","x25"},
+    {"s10","x26"},
+    {"s11","x27"},
+    {"t3","x28"},
+    {"t4","x29"},
+    {"t5","x30"},
+    {"t6","x31"}
 };
 
 string hexDigitToBinary(char hexDigit) {
@@ -59,93 +123,104 @@ string hexDigitToBinary(char hexDigit) {
     }
 }
 
-string hexToBin(string hex) {
-    string binary = "";
-    for (char hexDigit : hex) {
-        string bin = hexDigitToBinary(hexDigit);
-        if (!bin.empty()) {
-            binary += bin;
-        } else {
-            cerr << "Invalid hexadecimal digit: " << hexDigit << std::endl;
-            return "";
-        }
-    }
-    
-    if (binary.length() > 32) {
-        binary = binary.substr(binary.length() - 32);
-    } else if (binary.length() < 32) {
-        binary = string(32 - binary.length(), '0') + binary;
-    }
-
-    return binary;
-}
-
-string decimalToBinary(const string& decimalStr) {
-    int decimal = stoi(decimalStr);
-    string binaryStr = bitset<32>(decimal).to_string();
-
-    // binaryStr.erase(0, binaryStr.find_first_not_of('0'));
-
-    if (binaryStr.empty()) {
-        binaryStr = "0";
-    }
-
-    return binaryStr;
-}
-
-string tolowerString(const string& func){
-    string str = "";
-    for(const char &it : func){
-        str.push_back(tolower(it));
-    }
-    return str;
-}
-
-void makeStrLenBin(string &s, int n){
-    if(s[0] == '0' && (s[1] == 'x' || s[1] == 'X')){
-        s.erase(0,2);
-        s = hexToBin(s);
-    }
-    else {
-        s = decimalToBinary(s);           
-    }
-    s.erase(0, 32-n);
-}
-
-string findRegister(string s){
-    if(registers.find(s) != registers.end()){
-        return registers[s];
-    }
-    return "-1";
-}
-
-void labelToImme(string &str, int n, int lineNum){
-    int labelIdx = -1;
-    if(labels.find(str) != labels.end()){
-        labelIdx = labels[str];
-    }
-    else {
-
-    }
-    int offset = lineNum - labelIdx;
-    str = to_string(offset);
-
-    makeStrLenBin(str, n-1);
-    if(offset > 0){
-        str = "1" + str;
-    }
-    else {
-        str = "0" + str;
-    }
-}
-
-class R{
-private:
-    string opcode = "0110011", rd, func3, rs1, rs2, func7;
+class Instruction {
+public:
     string machineCode;
 
+    string hexToBin(string hex) {
+        string binary = "";
+        for (char hexDigit : hex) {
+            string bin = hexDigitToBinary(hexDigit);
+            if (!bin.empty()) {
+                binary += bin;
+            } else {
+                cerr << "Invalid hexadecimal digit: " << hexDigit << std::endl;
+                return "";
+            }
+        }
+
+        if (binary.length() > 32) {
+            binary = binary.substr(binary.length() - 32);
+        } else if (binary.length() < 32) {
+            binary = string(32 - binary.length(), '0') + binary;
+        }
+
+        return binary;
+    }
+
+    string decimalToBinary(const string& decimalStr) {
+        int decimal = stoi(decimalStr);
+        string binaryStr = bitset<32>(decimal).to_string();
+
+        if (binaryStr.empty()) {
+            binaryStr = "0";
+        }
+
+        return binaryStr;
+    }
+
+    string tolowerString(const string& func){
+        string str = "";
+        for(const char &it : func){
+            str.push_back(tolower(it));
+        }
+        return str;
+    }
+
+    void makeStrLenBin(string &s, int n){
+        if(s[0] == '0' && (s[1] == 'x' || s[1] == 'X')){
+            s.erase(0,2);
+            s = hexToBin(s);
+        }
+        else {
+            s = decimalToBinary(s);           
+        }
+        s.erase(0, 32-n);
+    }
+
+    string findRegister(string s){
+        if(s[0] != 'x' && s[0] != 'X'){
+            if(registers.find(s) != registers.end()){
+                s = registers[s];
+            } 
+        }
+        s.erase(0, 1);
+        // cout << s << endl;
+        makeStrLenBin(s, 5);
+        return s;
+    }
+
+    void labelToImme(string &str, int n, int lineNum){
+        int labelIdx = -1;
+        if(labels.find(str) != labels.end()){
+            labelIdx = labels[str];
+        }
+        else {
+
+        }
+        int offset = lineNum - labelIdx;
+        str = to_string(offset);
+
+        makeStrLenBin(str, n-1);
+        if(offset > 0){
+            str = "1" + str;
+        }
+        else {
+            str = "0" + str;
+        }
+    }
+
+    string getMachineCode(){
+        return machineCode;
+    }
+};
+
+class R : public Instruction {
+private:
+    string opcode = "0110011", rd, func3, rs1, rs2, func7;
+
     void joinCodes(){
-        cout << func7 << " " << rs2 << " " << rs1 << " " << func3 << " " << rd << " " << opcode << endl;
+        // cout << func7 << " " << rs2 << " " << rs1 << " " << func3 << " " << rd << " " << opcode << endl;
         machineCode = func7 + rs2 + rs1 + func3 + rd + opcode;
     }
 
@@ -166,19 +241,14 @@ public:
         this->func7 = modeAndFunc[2];
         joinCodes();
     }
-
-    string getMachineCode(){
-        return machineCode;
-    }
 };
 
-class I{
+class I : public Instruction {
 private:
     string opcode = "0010011", rd, func3, rs1, imm;
-    string machineCode;
 
     void joinCodes(){
-        cout << imm << " " << rs1 << " " << func3 << " " << rd << " " << opcode << endl;
+        // cout << imm << " " << rs1 << " " << func3 << " " << rd << " " << opcode << endl;
         machineCode = imm + rs1 + func3 + rd + opcode;
     }
 
@@ -204,19 +274,14 @@ public:
         this->func3 = modeAndFunc[1];
         joinCodes();
     }
-
-    string getMachineCode(){
-        return machineCode;
-    }
 };
 
-class S{
+class S : public Instruction {
 private:
     string opcode = "0100011", imm1, func3, rs1, rs2, imm2;
-    string machineCode;
 
     void joinCodes(){
-        cout << imm2 << " " << rs2 << " " << rs1 << " " << func3 << " " << imm1 << " " << opcode << endl;
+        // cout << imm2 << " " << rs2 << " " << rs1 << " " << func3 << " " << imm1 << " " << opcode << endl;
         machineCode = imm2 + rs2 + rs1 + func3 + imm1 + opcode;
     }
 
@@ -238,19 +303,14 @@ public:
         this->func3 = modeAndFunc[1];
         joinCodes();
     }
-
-    string getMachineCode(){
-        return machineCode;
-    }
 };
 
-class B{
+class B : public Instruction {
 private:
     string opcode = "1100011", imm1, func3, rs1, rs2, imm2;
-    string machineCode;
 
     void joinCodes(){
-        cout << imm2 << " " << rs2 << " " << rs1 << " " << func3 << " " << imm1 << " " << opcode << endl;
+        // cout << imm2 << " " << rs2 << " " << rs1 << " " << func3 << " " << imm1 << " " << opcode << endl;
         machineCode = imm2 + rs2 + rs1 + func3 + imm1 + opcode;
     }
 
@@ -279,24 +339,19 @@ public:
         this->func3 = modeAndFunc[1];
         joinCodes();
     }
-
-    string getMachineCode(){
-        return machineCode;
-    }
 };
 
-class U{
+class U : public Instruction {
 private:
     string opcode = "0110111", rd, imm;
-    string machineCode;
 
     void joinCodes(){
-        cout << imm << " " << rd << " " << opcode << endl;
+        // cout << imm << " " << rd << " " << opcode << endl;
         machineCode = imm + rd + opcode;
     }
 
 public:
-    U (vector<string> inst_break, vector<string> modeAndFunc) {
+    U (vector<string> inst_break) {
         this->rd = inst_break[1];
         this->imm = inst_break[2];
 
@@ -307,24 +362,19 @@ public:
 
         joinCodes();
     }
-
-    string getMachineCode(){
-        return machineCode;
-    }
 };
 
-class J{
+class J : public Instruction {
 private:
     string opcode = "1101111", rd, imm;
-    string machineCode;
 
     void joinCodes(){
-        cout << imm << " " << rd << " " << opcode << endl;
+        // cout << imm << " " << rd << " " << opcode << endl;
         machineCode = imm + rd + opcode;
     }
 
 public:
-    J (vector<string> inst_break, vector<string> modeAndFunc, int lineNum) {
+    J (vector<string> inst_break, int lineNum) {
         this->rd = inst_break[1];
         rd = tolowerString(rd.substr(0, rd.find(',')));
         rd = findRegister(rd);
@@ -339,16 +389,17 @@ public:
 
         joinCodes();
     }
-
-    string getMachineCode(){
-        return machineCode;
-    }
 };
-
 
 class Assembler {
 private:
-    unordered_map<string, vector<string>> functions; //{func, {addMode, func3, func7}};
+    string tolowerString(const string& func){
+        string str = "";
+        for(const char &it : func){
+            str.push_back(tolower(it));
+        }
+        return str;
+    }
     
     vector<string> getInfo(string func){
         func = tolowerString(func);
@@ -358,57 +409,6 @@ private:
         return {""};
     }
     
-public:
-   Assembler() {
-    // R-type instructions
-    functions["add"] = {"R", "000", "0000000"};   // Addition
-    functions["sub"] = {"R", "000", "0100000"};   // Subtraction
-    functions["sll"] = {"R", "001", "0000000"};   // Shift Left Logical
-    functions["slt"] = {"R", "010", "0000000"};   // Set Less Than
-    functions["sltu"] = {"R", "011", "0000000"};  // Set Less Than Unsigned
-    functions["xor"] = {"R", "100", "0000000"};   // XOR
-    functions["srl"] = {"R", "101", "0000000"};   // Shift Right Logical
-    functions["sra"] = {"R", "101", "0100000"};   // Shift Right Arithmetic
-    functions["or"] = {"R", "110", "0000000"};    // OR
-    functions["and"] = {"R", "111", "0000000"};   // AND
-    
-    // I-type instructions
-    functions["jalr"] = {"I", "000", ""};  // Jump and Link Register
-    functions["addi"] = {"I", "000", ""};  // Add Immediate
-    functions["slti"] = {"I", "010", ""};  // Set Less Than Immediate
-    functions["sltiu"] = {"I", "011", ""}; // Set Less Than Immediate Unsigned
-    functions["xori"] = {"I", "100", ""};  // XOR Immediate
-    functions["ori"] = {"I", "110", ""};   // OR Immediate
-    functions["andi"] = {"I", "111", ""};  // AND Immediate
-
-    // I-type Load instructions
-    functions["lb"] = {"I", "000", ""};    // Load Byte
-    functions["lh"] = {"I", "001", ""};    // Load Halfword
-    functions["lw"] = {"I", "010", ""};    // Load Word
-    functions["lbu"] = {"I", "100", ""};   // Load Byte Unsigned
-    functions["lhu"] = {"I", "101", ""};   // Load Halfword Unsigned
-
-    // S-type instructions
-    functions["sb"] = {"S", "000", ""};    // Store Byte
-    functions["sh"] = {"S", "001", ""};    // Store Halfword
-    functions["sw"] = {"S", "010", ""};    // Store Word
-    
-    // B-type instructions
-    functions["beq"] = {"B", "000", ""};   // Branch Equal
-    functions["bne"] = {"B", "001", ""};   // Branch Not Equal
-    functions["blt"] = {"B", "010", ""};   // Branch Less Than
-    functions["bge"] = {"B", "011", ""};   // Branch Greater or Equal
-    functions["bltu"] = {"B", "100", ""};  // Branch Less Than Unsigned
-    functions["bgeu"] = {"B", "101", ""};  // Branch Greater or Equal Unsigned
-    
-    // U-type instructions
-    functions["lui"] = {"U", "", ""};      // Load Upper Immediate
-    functions["auipc"] = {"U", "", ""};    // Add Upper Immediate to PC
-    
-    // J-type instructions
-    functions["jal"] = {"J", "", ""};      // Jump and Link
-}
-
     void removeBrackets(string& instruction){
         int n = instruction.size();
         for(int i = 0; i < n; i ++){
@@ -418,20 +418,7 @@ public:
         }
     }
 
-    string assemble(string& instruction, int lineNum){
-        removeBrackets(instruction);
-
-        vector<string> inst_break;
-        stringstream s(instruction);
-        string word;
-
-        while (getline(s, word, ' ')) {
-            inst_break.push_back(word);
-        }
-        
-        vector<string> modeAndFunc = getInfo(inst_break[0]);
-        string addMode = modeAndFunc[0];
-
+    string help_assembler(vector<string>& inst_break, vector<string>& modeAndFunc, int lineNum, string addMode){
         string machineCode = "";
         if(addMode == "R"){
             R rMode = R(inst_break, modeAndFunc);
@@ -450,21 +437,44 @@ public:
             machineCode = bMode.getMachineCode();
         }
         else if(addMode == "U"){
-            U uMode = U(inst_break, modeAndFunc);
+            U uMode = U(inst_break);
             machineCode = uMode.getMachineCode();
         }
         else if(addMode == "J"){
-            J jMode = J(inst_break, modeAndFunc, lineNum);
+            J jMode = J(inst_break, lineNum);
             machineCode = jMode.getMachineCode();
         }
 
         return machineCode;
     }
+
+public:
+   Assembler() {
+       initializeFunctions();
+   }
+
+    string assemble(string& instruction, int lineNum){
+        removeBrackets(instruction);
+
+        vector<string> inst_break;
+        stringstream s(instruction);
+        string word;
+
+        while (getline(s, word, ' ')) {
+            inst_break.push_back(word);
+        }
+        
+        vector<string> modeAndFunc = getInfo(inst_break[0]);
+        string addMode = modeAndFunc[0];
+
+        string machineCode = help_assembler(inst_break, modeAndFunc, lineNum, addMode);
+
+        return machineCode;
+    }
 };
 
-int main(){
-    vector<string> assemblyCode;
 
+void readCodeAndFindLabel(vector<string>& assemblyCode){
     ifstream fin;
     fin.open("AssemblyCode.txt");
 
@@ -482,24 +492,43 @@ int main(){
     }
 
     fin.close();
+}
 
-
-    Assembler assembler;
-
+vector<string> convertToMachineCode(Assembler assembler, vector<string>& assemblyCode){
+    vector<string> machineCode;
     ofstream fout;
     fout.open("MachineCode.txt");
 
-    count = 0;
+    int count = 0;
+    string line;
     for(int i=1; i <= assemblyCode.size(); i++){
         line = assemblyCode[i-1];
         if(line.find(" ") != string::npos){
             string str = assembler.assemble(line, i);
+            machineCode.push_back(str);
             fout << str << endl;
         }
         count ++;
     }
 
     fout.close();
+    return machineCode;
+}
+
+void printCodes(vector<string>& code){
+    cout << endl;
+    for(auto &it : code){
+        cout << it << endl;
+    }
+}
+int main(){
+    vector<string> assemblyCode;
+
+    readCodeAndFindLabel(assemblyCode);
+    Assembler assembler;
+    vector<string> machineCode = convertToMachineCode(assembler, assemblyCode);
+
+    printCodes(machineCode);
 
     // string s;
     // while(1){
@@ -513,3 +542,5 @@ int main(){
     //     cout << str << endl;
     // }
 }
+
+
