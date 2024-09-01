@@ -78,7 +78,7 @@ public:
 
 class S {
     
-}
+};
 
 class Assembler {
 private:
