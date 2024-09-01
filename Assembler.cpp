@@ -79,6 +79,14 @@ string hexToBin(const string hex) {
     return binary;
 }
 
+string tolowerString(const string& func){
+    string str = "";
+    for(const char &it : func){
+        str.push_back(tolower(it));
+    }
+    return str;
+}
+
 class R{
 private:
     string opcode = "0110011", rd, func3, rs1, rs2, func7;
@@ -101,8 +109,8 @@ public:
         this->rs1 = inst_break[2];
         this->rs2 = inst_break[3];
 
-        rd = rd.substr(0, rd.find(','));
-        rs1 = rs1.substr(0, rs1.find(','));
+        rd = tolowerString(rd.substr(0, rd.find(',')));
+        rs1 = tolowerString(rs1.substr(0, rs1.find(',')));
 
         rd = findRegister(rd);
         rs1 = findRegister(rs1);
@@ -120,7 +128,7 @@ public:
 
 class I{
 private:
-    string opcode = "0110011", rd, func3, rs1, imm;
+    string opcode = "0010011", rd, func3, rs1, imm;
     string machineCode;
 
     string findRegister(string s){
@@ -140,8 +148,8 @@ public:
         this->rs1 = inst_break[2];
         this->imm = inst_break[3];
 
-        rd = rd.substr(0, rd.find(','));
-        rs1 = rs1.substr(0, rs1.find(','));
+        rd = tolowerString(rd.substr(0, rd.find(',')));
+        rs1 = tolowerString(rs1.substr(0, rs1.find(',')));
 
         rd = findRegister(rd);
         rs1 = findRegister(rs1);
@@ -159,7 +167,7 @@ public:
 
 class S{
 private:
-    string opcode = "0110011", rd, func3, rs1, rs2, func7;
+    string opcode = "0100011", imm1, func3, rs1, rs2, imm2;
     string machineCode;
 
     string findRegister(string s){
@@ -169,8 +177,8 @@ private:
         return "-1";
     }
     void joinCodes(){
-        cout << func7 << " " << rs2 << " " << rs1 << " " << func3 << " " << rd << " " << opcode << endl;
-        machineCode = func7 + rs2 + rs1 + func3 + rd + opcode;
+        cout << imm2 << " " << rs2 << " " << rs1 << " " << func3 << " " << imm1 << " " << opcode << endl;
+        machineCode = imm2 + rs2 + rs1 + func3 + imm1 + opcode;
     }
 
 public:
@@ -316,16 +324,10 @@ public:
 
 class Assembler {
 private:
-    unordered_map<string, vector<string>> functions; //{func, {addMode, func3, func7}}
-
-    void tolowerString(const string& func){
-        for(const char &it : func){
-            tolower(it);
-        }
-    }
-
-    vector<string> getInfo(const string& func){
-        tolowerString(func);
+    unordered_map<string, vector<string>> functions; //{func, {addMode, func3, func7}};
+    
+    vector<string> getInfo(string func){
+        func = tolowerString(func);
         if(functions.find(func) != functions.end()){
             return functions[func];
         }
