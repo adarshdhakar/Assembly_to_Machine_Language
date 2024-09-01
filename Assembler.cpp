@@ -79,6 +79,19 @@ string hexToBin(const string hex) {
     return binary;
 }
 
+string decimalToBinary(const string& decimalStr) {
+    int decimal = stoi(decimalStr);
+    string binaryStr = bitset<32>(decimal).to_string();
+
+    // binaryStr.erase(0, binaryStr.find_first_not_of('0'));
+
+    if (binaryStr.empty()) {
+        binaryStr = "0";
+    }
+
+    return binaryStr;
+}
+
 string tolowerString(const string& func){
     string str = "";
     for(const char &it : func){
@@ -151,6 +164,11 @@ public:
         rd = tolowerString(rd.substr(0, rd.find(',')));
         rs1 = tolowerString(rs1.substr(0, rs1.find(',')));
 
+        if(tolower(inst_break[0][0]) == 'l'){
+            swap(rs1, imm);
+            opcode = "0000011";
+        }
+
         rd = findRegister(rd);
         rs1 = findRegister(rs1);
 
@@ -180,22 +198,25 @@ private:
         cout << imm2 << " " << rs2 << " " << rs1 << " " << func3 << " " << imm1 << " " << opcode << endl;
         machineCode = imm2 + rs2 + rs1 + func3 + imm1 + opcode;
     }
-
+    void makeStrLenBin12(string &s){
+        int n = s.size();
+        s = decimalToBinary(s);
+        s.erase(0, 20);
+    }
 public:
     S (vector<string> inst_break, vector<string> modeAndFunc) {
-        this->rd = inst_break[1];
-        this->rs1 = inst_break[2];
-        this->rs2 = inst_break[3];
-        rd = rd.substr(0, rd.find(','));
-        rs1 = rs1.substr(0, rs1.find(','));
+        this->rs2 = inst_break[1];
+        string str = inst_break[2];
+        makeStrLenBin12(str);
+        this->imm2 = str.substr(0, 7);
+        this->imm1 = str.substr(7, 12);
+        this->rs1 = inst_break[3];
         rs2 = rs2.substr(0, rs2.find(','));
 
-        rd = findRegister(rd);
-        rs1 = findRegister(rs1);
         rs2 = findRegister(rs2);
+        rs1 = findRegister(rs1);
 
         this->func3 = modeAndFunc[1];
-        this->func7 = modeAndFunc[2];
         joinCodes();
     }
 
@@ -245,7 +266,7 @@ public:
 
 class U{
 private:
-    string opcode = "0110011", rd, func3, rs1, rs2, func7;
+    string opcode = "0110111", rd, imm;
     string machineCode;
 
     string findRegister(string s){
@@ -255,25 +276,20 @@ private:
         return "-1";
     }
     void joinCodes(){
-        cout << func7 << " " << rs2 << " " << rs1 << " " << func3 << " " << rd << " " << opcode << endl;
-        machineCode = func7 + rs2 + rs1 + func3 + rd + opcode;
+        cout << imm << " " << rd << " " << opcode << endl;
+        machineCode = imm + rd + opcode;
     }
 
 public:
     U (vector<string> inst_break, vector<string> modeAndFunc) {
         this->rd = inst_break[1];
-        this->rs1 = inst_break[2];
-        this->rs2 = inst_break[3];
-        rd = rd.substr(0, rd.find(','));
-        rs1 = rs1.substr(0, rs1.find(','));
-        rs2 = rs2.substr(0, rs2.find(','));
+        this->imm = inst_break[2];
 
+        rd = tolowerString(rd.substr(0, rd.find(',')));
         rd = findRegister(rd);
-        rs1 = findRegister(rs1);
-        rs2 = findRegister(rs2);
 
-        this->func3 = modeAndFunc[1];
-        this->func7 = modeAndFunc[2];
+        imm = hexToBin(imm);
+        
         joinCodes();
     }
 
@@ -393,6 +409,7 @@ public:
             }
         }
     }
+
     string assemble(string& instruction){
         removeBrackets(instruction);
 

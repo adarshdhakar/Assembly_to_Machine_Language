@@ -1,5 +1,6 @@
 {
   "files.associations": {
+    "*.ejs": "html",
     "string": "cpp",
     "string_view": "cpp",
     "array": "cpp",
@@ -15,7 +16,8 @@
     "span": "cpp",
     "stacktrace": "cpp",
     "regex": "cpp",
-    "valarray": "cpp"
+    "valarray": "cpp",
+    "bitset": "cpp"
   },
   "C_Cpp_Runner.cCompilerPath": "gcc",
   "C_Cpp_Runner.cppCompilerPath": "g++",
