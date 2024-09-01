@@ -318,7 +318,14 @@ class Assembler {
 private:
     unordered_map<string, vector<string>> functions; //{func, {addMode, func3, func7}}
 
+    void tolowerString(const string& func){
+        for(const char &it : func){
+            tolower(it);
+        }
+    }
+
     vector<string> getInfo(const string& func){
+        tolowerString(func);
         if(functions.find(func) != functions.end()){
             return functions[func];
         }
