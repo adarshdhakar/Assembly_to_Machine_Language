@@ -266,13 +266,15 @@ public:
         rs1 = findRegister(rs1);
 
         string str = inst_break[3];
-        labelToImme(str, 13, lineNum);
+        
+        labelToImme(str, 12, lineNum);
+        this->imm2 = str.substr(0, 7);
+        this->imm1 = str.substr(7, 12);
 
-        // this->imm2 = str.substr(0, 7);
-        // this->imm1 = str.substr(7, 12);
-        reverse(str.begin(), str.end());
-        this->imm2 = str[12] + str.substr(5, 11);
-        this->imm1 = str.substr(1, 5) + str[11];
+        // labelToImme(str, 13, lineNum);
+        // str.erase(str.size() - 1);
+        // this->imm2 = str[0] + str.substr(2, 6) ;
+        // this->imm1 = str.substr(8, 4) + str[1];
         
         this->func3 = modeAndFunc[1];
         joinCodes();
@@ -328,9 +330,12 @@ public:
         rd = findRegister(rd);
 
         this->imm = inst_break[2];
-        labelToImme(imm, 21, lineNum);
-        reverse(imm.begin(), imm.end());
-        this->imm = imm[20] + imm.substr(1, 11) + imm[11] + imm.substr(12, 20);
+        labelToImme(imm, 20, lineNum);
+
+        // labelToImme(imm, 21, lineNum);
+        // imm.erase(imm.size() - 1);
+        // string str = imm;
+        // imm = str[0] + str.substr(10, 10) + str[9] + str.substr(1, 8);
 
         joinCodes();
     }
