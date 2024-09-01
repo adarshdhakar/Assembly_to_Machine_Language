@@ -58,7 +58,7 @@ string hexDigitToBinary(char hexDigit) {
     }
 }
 
-string hexToBin(const string hex) {
+string hexToBin(string hex) {
     string binary = "";
     for (char hexDigit : hex) {
         string bin = hexDigitToBinary(hexDigit);
@@ -69,13 +69,13 @@ string hexToBin(const string hex) {
             return "";
         }
     }
-    int hexSize = hex.size();
-    if(hexSize == 1){
-        binary = "00000000" + binary;
+    
+    if (binary.length() > 32) {
+        binary = binary.substr(binary.length() - 32);
+    } else if (binary.length() < 32) {
+        binary = string(32 - binary.length(), '0') + binary;
     }
-    else if(hexSize == 2){
-        binary = "0000" + binary;
-    }
+
     return binary;
 }
 
@@ -98,6 +98,17 @@ string tolowerString(const string& func){
         str.push_back(tolower(it));
     }
     return str;
+}
+
+void makeStrLenBin(string &s, int n){
+    if(s[0] == '0' && (s[1] == 'x' || s[1] == 'X')){
+        s.erase(0,2);
+        s = hexToBin(s);
+    }
+    else {
+        s = decimalToBinary(s);           
+    }
+    s.erase(0, 32-n);
 }
 
 class R{
@@ -172,7 +183,7 @@ public:
         rd = findRegister(rd);
         rs1 = findRegister(rs1);
 
-        imm = hexToBin(imm);
+        makeStrLenBin(imm, 12);
 
         this->func3 = modeAndFunc[1];
         joinCodes();
@@ -198,16 +209,14 @@ private:
         cout << imm2 << " " << rs2 << " " << rs1 << " " << func3 << " " << imm1 << " " << opcode << endl;
         machineCode = imm2 + rs2 + rs1 + func3 + imm1 + opcode;
     }
-    void makeStrLenBin12(string &s){
-        int n = s.size();
-        s = decimalToBinary(s);
-        s.erase(0, 20);
-    }
+
 public:
     S (vector<string> inst_break, vector<string> modeAndFunc) {
         this->rs2 = inst_break[1];
         string str = inst_break[2];
-        makeStrLenBin12(str);
+
+        makeStrLenBin(str, 12);
+
         this->imm2 = str.substr(0, 7);
         this->imm1 = str.substr(7, 12);
         this->rs1 = inst_break[3];
@@ -217,6 +226,40 @@ public:
         rs1 = findRegister(rs1);
 
         this->func3 = modeAndFunc[1];
+        joinCodes();
+    }
+
+    string getMachineCode(){
+        return machineCode;
+    }
+};
+
+class U{
+private:
+    string opcode = "0110111", rd, imm;
+    string machineCode;
+
+    string findRegister(string s){
+        if(registers.find(s) != registers.end()){
+            return registers[s];
+        }
+        return "-1";
+    }
+    void joinCodes(){
+        cout << imm << " " << rd << " " << opcode << endl;
+        machineCode = imm + rd + opcode;
+    }
+
+public:
+    U (vector<string> inst_break, vector<string> modeAndFunc) {
+        this->rd = inst_break[1];
+        this->imm = inst_break[2];
+
+        rd = tolowerString(rd.substr(0, rd.find(',')));
+        rd = findRegister(rd);
+
+        makeStrLenBin(imm, 20);
+
         joinCodes();
     }
 
@@ -256,40 +299,6 @@ public:
 
         this->func3 = modeAndFunc[1];
         this->func7 = modeAndFunc[2];
-        joinCodes();
-    }
-
-    string getMachineCode(){
-        return machineCode;
-    }
-};
-
-class U{
-private:
-    string opcode = "0110111", rd, imm;
-    string machineCode;
-
-    string findRegister(string s){
-        if(registers.find(s) != registers.end()){
-            return registers[s];
-        }
-        return "-1";
-    }
-    void joinCodes(){
-        cout << imm << " " << rd << " " << opcode << endl;
-        machineCode = imm + rd + opcode;
-    }
-
-public:
-    U (vector<string> inst_break, vector<string> modeAndFunc) {
-        this->rd = inst_break[1];
-        this->imm = inst_break[2];
-
-        rd = tolowerString(rd.substr(0, rd.find(',')));
-        rd = findRegister(rd);
-
-        imm = hexToBin(imm);
-        
         joinCodes();
     }
 
