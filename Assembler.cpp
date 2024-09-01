@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+map<string, int> labels;
 unordered_map<string, string> registers = {
     {"x0", "00000"},
     {"x1", "00001"},
@@ -118,8 +119,24 @@ string findRegister(string s){
     return "-1";
 }
 
-void labelToImme(string &str, int n){
-    makeStrLenBin(str, n);
+void labelToImme(string &str, int n, int lineNum){
+    int labelIdx = -1;
+    if(labels.find(str) != labels.end()){
+        labelIdx = labels[str];
+    }
+    else {
+
+    }
+    int offset = lineNum - labelIdx;
+    str = to_string(offset);
+
+    makeStrLenBin(str, n-1);
+    if(offset > 0){
+        str = "1" + str;
+    }
+    else {
+        str = "0" + str;
+    }
 }
 
 class R{
@@ -238,7 +255,7 @@ private:
     }
 
 public:
-    B (vector<string> inst_break, vector<string> modeAndFunc) {
+    B (vector<string> inst_break, vector<string> modeAndFunc, int lineNum) {
         this->rs2 = inst_break[1];
         this->rs1 = inst_break[2];
 
@@ -249,7 +266,7 @@ public:
         rs1 = findRegister(rs1);
 
         string str = inst_break[3];
-        labelToImme(str, 13);
+        labelToImme(str, 13, lineNum);
 
         // this->imm2 = str.substr(0, 7);
         // this->imm1 = str.substr(7, 12);
@@ -305,13 +322,13 @@ private:
     }
 
 public:
-    J (vector<string> inst_break, vector<string> modeAndFunc) {
+    J (vector<string> inst_break, vector<string> modeAndFunc, int lineNum) {
         this->rd = inst_break[1];
         rd = tolowerString(rd.substr(0, rd.find(',')));
         rd = findRegister(rd);
 
         this->imm = inst_break[2];
-        labelToImme(imm, 21);
+        labelToImme(imm, 21, lineNum);
         reverse(imm.begin(), imm.end());
         this->imm = imm[20] + imm.substr(1, 11) + imm[11] + imm.substr(12, 20);
 
@@ -396,7 +413,7 @@ public:
         }
     }
 
-    string assemble(string& instruction){
+    string assemble(string& instruction, int lineNum){
         removeBrackets(instruction);
 
         vector<string> inst_break;
@@ -424,7 +441,7 @@ public:
             machineCode = sMode.getMachineCode();
         }
         else if(addMode == "B"){
-            B bMode = B(inst_break, modeAndFunc);
+            B bMode = B(inst_break, modeAndFunc, lineNum);
             machineCode = bMode.getMachineCode();
         }
         else if(addMode == "U"){
@@ -432,7 +449,7 @@ public:
             machineCode = uMode.getMachineCode();
         }
         else if(addMode == "J"){
-            J jMode = J(inst_break, modeAndFunc);
+            J jMode = J(inst_break, modeAndFunc, lineNum);
             machineCode = jMode.getMachineCode();
         }
 
@@ -441,16 +458,53 @@ public:
 };
 
 int main(){
-    string s;
-    Assembler assembler;
-    while(1){
-        getline(cin, s, '\n');
+    vector<string> assemblyCode;
 
-        if (s.empty()) {
-            break; 
+    ifstream fin;
+    fin.open("AssemblyCode.txt");
+
+    string line;
+    int count = 1;
+
+    while (getline(fin, line)) {
+        if(line.find(" ") == string::npos){
+            line.pop_back();
+            labels[line] = count;
         }
-
-        string str = assembler.assemble(s);
-        cout << str << endl;
+        assemblyCode.push_back(line);
+        cout << line << endl;
+        count ++;
     }
+
+    fin.close();
+
+
+    Assembler assembler;
+
+    ofstream fout;
+    fout.open("MachineCode.txt");
+
+    count = 0;
+    for(int i=1; i <= assemblyCode.size(); i++){
+        line = assemblyCode[i-1];
+        if(line.find(" ") != string::npos){
+            string str = assembler.assemble(line, i);
+            fout << str << endl;
+        }
+        count ++;
+    }
+
+    fout.close();
+
+    // string s;
+    // while(1){
+    //     getline(cin, s, '\n');
+
+    //     if (s.empty()) {
+    //         break; 
+    //     }
+
+    //     string str = assembler.assemble(s);
+    //     cout << str << endl;
+    // }
 }
