@@ -76,9 +76,201 @@ public:
     }
 };
 
-class S {
-    
+class I{
+private:
+    string opcode = "0110011", rd, func3, rs1, rs2, func7;
+    string machineCode;
+
+    string findRegister(string s){
+        if(registers.find(s) != registers.end()){
+            return registers[s];
+        }
+        return "-1";
+    }
+    void joinCodes(){
+        cout << func7 << " " << rs2 << " " << rs1 << " " << func3 << " " << rd << " " << opcode << endl;
+        machineCode = func7 + rs2 + rs1 + func3 + rd + opcode;
+    }
+
+public:
+    I (vector<string> inst_break, vector<string> modeAndFunc) {
+        this->rd = inst_break[1];
+        this->rs1 = inst_break[2];
+        this->rs2 = inst_break[3];
+        rd = rd.substr(0, rd.find(','));
+        rs1 = rs1.substr(0, rs1.find(','));
+        rs2 = rs2.substr(0, rs2.find(','));
+
+        rd = findRegister(rd);
+        rs1 = findRegister(rs1);
+        rs2 = findRegister(rs2);
+
+        this->func3 = modeAndFunc[1];
+        this->func7 = modeAndFunc[2];
+        joinCodes();
+    }
+
+    string getMachineCode(){
+        return machineCode;
+    }
 };
+
+class S{
+private:
+    string opcode = "0110011", rd, func3, rs1, rs2, func7;
+    string machineCode;
+
+    string findRegister(string s){
+        if(registers.find(s) != registers.end()){
+            return registers[s];
+        }
+        return "-1";
+    }
+    void joinCodes(){
+        cout << func7 << " " << rs2 << " " << rs1 << " " << func3 << " " << rd << " " << opcode << endl;
+        machineCode = func7 + rs2 + rs1 + func3 + rd + opcode;
+    }
+
+public:
+    S (vector<string> inst_break, vector<string> modeAndFunc) {
+        this->rd = inst_break[1];
+        this->rs1 = inst_break[2];
+        this->rs2 = inst_break[3];
+        rd = rd.substr(0, rd.find(','));
+        rs1 = rs1.substr(0, rs1.find(','));
+        rs2 = rs2.substr(0, rs2.find(','));
+
+        rd = findRegister(rd);
+        rs1 = findRegister(rs1);
+        rs2 = findRegister(rs2);
+
+        this->func3 = modeAndFunc[1];
+        this->func7 = modeAndFunc[2];
+        joinCodes();
+    }
+
+    string getMachineCode(){
+        return machineCode;
+    }
+};
+
+class B{
+private:
+    string opcode = "0110011", rd, func3, rs1, rs2, func7;
+    string machineCode;
+
+    string findRegister(string s){
+        if(registers.find(s) != registers.end()){
+            return registers[s];
+        }
+        return "-1";
+    }
+    void joinCodes(){
+        cout << func7 << " " << rs2 << " " << rs1 << " " << func3 << " " << rd << " " << opcode << endl;
+        machineCode = func7 + rs2 + rs1 + func3 + rd + opcode;
+    }
+
+public:
+    B (vector<string> inst_break, vector<string> modeAndFunc) {
+        this->rd = inst_break[1];
+        this->rs1 = inst_break[2];
+        this->rs2 = inst_break[3];
+        rd = rd.substr(0, rd.find(','));
+        rs1 = rs1.substr(0, rs1.find(','));
+        rs2 = rs2.substr(0, rs2.find(','));
+
+        rd = findRegister(rd);
+        rs1 = findRegister(rs1);
+        rs2 = findRegister(rs2);
+
+        this->func3 = modeAndFunc[1];
+        this->func7 = modeAndFunc[2];
+        joinCodes();
+    }
+
+    string getMachineCode(){
+        return machineCode;
+    }
+};
+
+class U{
+private:
+    string opcode = "0110011", rd, func3, rs1, rs2, func7;
+    string machineCode;
+
+    string findRegister(string s){
+        if(registers.find(s) != registers.end()){
+            return registers[s];
+        }
+        return "-1";
+    }
+    void joinCodes(){
+        cout << func7 << " " << rs2 << " " << rs1 << " " << func3 << " " << rd << " " << opcode << endl;
+        machineCode = func7 + rs2 + rs1 + func3 + rd + opcode;
+    }
+
+public:
+    U (vector<string> inst_break, vector<string> modeAndFunc) {
+        this->rd = inst_break[1];
+        this->rs1 = inst_break[2];
+        this->rs2 = inst_break[3];
+        rd = rd.substr(0, rd.find(','));
+        rs1 = rs1.substr(0, rs1.find(','));
+        rs2 = rs2.substr(0, rs2.find(','));
+
+        rd = findRegister(rd);
+        rs1 = findRegister(rs1);
+        rs2 = findRegister(rs2);
+
+        this->func3 = modeAndFunc[1];
+        this->func7 = modeAndFunc[2];
+        joinCodes();
+    }
+
+    string getMachineCode(){
+        return machineCode;
+    }
+};
+
+class J{
+private:
+    string opcode = "0110011", rd, func3, rs1, rs2, func7;
+    string machineCode;
+
+    string findRegister(string s){
+        if(registers.find(s) != registers.end()){
+            return registers[s];
+        }
+        return "-1";
+    }
+    void joinCodes(){
+        cout << func7 << " " << rs2 << " " << rs1 << " " << func3 << " " << rd << " " << opcode << endl;
+        machineCode = func7 + rs2 + rs1 + func3 + rd + opcode;
+    }
+
+public:
+    J (vector<string> inst_break, vector<string> modeAndFunc) {
+        this->rd = inst_break[1];
+        this->rs1 = inst_break[2];
+        this->rs2 = inst_break[3];
+        rd = rd.substr(0, rd.find(','));
+        rs1 = rs1.substr(0, rs1.find(','));
+        rs2 = rs2.substr(0, rs2.find(','));
+
+        rd = findRegister(rd);
+        rs1 = findRegister(rs1);
+        rs2 = findRegister(rs2);
+
+        this->func3 = modeAndFunc[1];
+        this->func7 = modeAndFunc[2];
+        joinCodes();
+    }
+
+    string getMachineCode(){
+        return machineCode;
+    }
+};
+
 
 class Assembler {
 private:
@@ -157,26 +349,26 @@ public:
             R rMode = R(inst_break, modeAndFunc);
             machineCode = rMode.getMachineCode();
         }
-        // else if(addMode == "I"){
-        //     I iMode = I(inst_break, modeAndFunc);
-        //     machineCode = iMode.getMachineCode();
-        // }
-        // else if(addMode == "S"){
-        //     S sMode = S(inst_break, modeAndFunc);
-        //     machineCode = sMode.getMachineCode();
-        // }
-        // else if(addMode == "B"){
-        //     B bMode = B(inst_break, modeAndFunc);
-        //     machineCode = bMode.getMachineCode();
-        // }
-        // else if(addMode == "U"){
-        //     U uMode = U(inst_break, modeAndFunc);
-        //     machineCode = uMode.getMachineCode();
-        // }
-        // else if(addMode == "J"){
-        //     J jMode = J(inst_break, modeAndFunc);
-        //     machineCode = jMode.getMachineCode();
-        // }
+        else if(addMode == "I"){
+            I iMode = I(inst_break, modeAndFunc);
+            machineCode = iMode.getMachineCode();
+        }
+        else if(addMode == "S"){
+            S sMode = S(inst_break, modeAndFunc);
+            machineCode = sMode.getMachineCode();
+        }
+        else if(addMode == "B"){
+            B bMode = B(inst_break, modeAndFunc);
+            machineCode = bMode.getMachineCode();
+        }
+        else if(addMode == "U"){
+            U uMode = U(inst_break, modeAndFunc);
+            machineCode = uMode.getMachineCode();
+        }
+        else if(addMode == "J"){
+            J jMode = J(inst_break, modeAndFunc);
+            machineCode = jMode.getMachineCode();
+        }
 
         return machineCode;
     }
