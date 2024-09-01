@@ -111,17 +111,22 @@ void makeStrLenBin(string &s, int n){
     s.erase(0, 32-n);
 }
 
+string findRegister(string s){
+    if(registers.find(s) != registers.end()){
+        return registers[s];
+    }
+    return "-1";
+}
+
+void labelToImme(string &str, int n){
+    makeStrLenBin(str, n);
+}
+
 class R{
 private:
     string opcode = "0110011", rd, func3, rs1, rs2, func7;
     string machineCode;
 
-    string findRegister(string s){
-        if(registers.find(s) != registers.end()){
-            return registers[s];
-        }
-        return "-1";
-    }
     void joinCodes(){
         cout << func7 << " " << rs2 << " " << rs1 << " " << func3 << " " << rd << " " << opcode << endl;
         machineCode = func7 + rs2 + rs1 + func3 + rd + opcode;
@@ -155,12 +160,6 @@ private:
     string opcode = "0010011", rd, func3, rs1, imm;
     string machineCode;
 
-    string findRegister(string s){
-        if(registers.find(s) != registers.end()){
-            return registers[s];
-        }
-        return "-1";
-    }
     void joinCodes(){
         cout << imm << " " << rs1 << " " << func3 << " " << rd << " " << opcode << endl;
         machineCode = imm + rs1 + func3 + rd + opcode;
@@ -199,12 +198,6 @@ private:
     string opcode = "0100011", imm1, func3, rs1, rs2, imm2;
     string machineCode;
 
-    string findRegister(string s){
-        if(registers.find(s) != registers.end()){
-            return registers[s];
-        }
-        return "-1";
-    }
     void joinCodes(){
         cout << imm2 << " " << rs2 << " " << rs1 << " " << func3 << " " << imm1 << " " << opcode << endl;
         machineCode = imm2 + rs2 + rs1 + func3 + imm1 + opcode;
@@ -234,17 +227,50 @@ public:
     }
 };
 
+class B{
+private:
+    string opcode = "1100011", imm1, func3, rs1, rs2, imm2;
+    string machineCode;
+
+    void joinCodes(){
+        cout << imm2 << " " << rs2 << " " << rs1 << " " << func3 << " " << imm1 << " " << opcode << endl;
+        machineCode = imm2 + rs2 + rs1 + func3 + imm1 + opcode;
+    }
+
+public:
+    B (vector<string> inst_break, vector<string> modeAndFunc) {
+        this->rs2 = inst_break[1];
+        this->rs1 = inst_break[2];
+
+        rs2 = rs2.substr(0, rs2.find(','));
+        rs1 = rs1.substr(0, rs1.find(','));
+
+        rs2 = findRegister(rs2);
+        rs1 = findRegister(rs1);
+
+        string str = inst_break[3];
+        labelToImme(str, 13);
+
+        // this->imm2 = str.substr(0, 7);
+        // this->imm1 = str.substr(7, 12);
+        reverse(str.begin(), str.end());
+        this->imm2 = str[12] + str.substr(5, 11);
+        this->imm1 = str.substr(1, 5) + str[11];
+        
+        this->func3 = modeAndFunc[1];
+        joinCodes();
+    }
+
+    string getMachineCode(){
+        return machineCode;
+    }
+};
+
 class U{
 private:
     string opcode = "0110111", rd, imm;
     string machineCode;
 
-    string findRegister(string s){
-        if(registers.find(s) != registers.end()){
-            return registers[s];
-        }
-        return "-1";
-    }
     void joinCodes(){
         cout << imm << " " << rd << " " << opcode << endl;
         machineCode = imm + rd + opcode;
@@ -268,76 +294,27 @@ public:
     }
 };
 
-class B{
-private:
-    string opcode = "0110011", rd, func3, rs1, rs2, func7;
-    string machineCode;
-
-    string findRegister(string s){
-        if(registers.find(s) != registers.end()){
-            return registers[s];
-        }
-        return "-1";
-    }
-    void joinCodes(){
-        cout << func7 << " " << rs2 << " " << rs1 << " " << func3 << " " << rd << " " << opcode << endl;
-        machineCode = func7 + rs2 + rs1 + func3 + rd + opcode;
-    }
-
-public:
-    B (vector<string> inst_break, vector<string> modeAndFunc) {
-        this->rd = inst_break[1];
-        this->rs1 = inst_break[2];
-        this->rs2 = inst_break[3];
-        rd = rd.substr(0, rd.find(','));
-        rs1 = rs1.substr(0, rs1.find(','));
-        rs2 = rs2.substr(0, rs2.find(','));
-
-        rd = findRegister(rd);
-        rs1 = findRegister(rs1);
-        rs2 = findRegister(rs2);
-
-        this->func3 = modeAndFunc[1];
-        this->func7 = modeAndFunc[2];
-        joinCodes();
-    }
-
-    string getMachineCode(){
-        return machineCode;
-    }
-};
-
 class J{
 private:
-    string opcode = "0110011", rd, func3, rs1, rs2, func7;
+    string opcode = "1101111", rd, imm;
     string machineCode;
 
-    string findRegister(string s){
-        if(registers.find(s) != registers.end()){
-            return registers[s];
-        }
-        return "-1";
-    }
     void joinCodes(){
-        cout << func7 << " " << rs2 << " " << rs1 << " " << func3 << " " << rd << " " << opcode << endl;
-        machineCode = func7 + rs2 + rs1 + func3 + rd + opcode;
+        cout << imm << " " << rd << " " << opcode << endl;
+        machineCode = imm + rd + opcode;
     }
 
 public:
     J (vector<string> inst_break, vector<string> modeAndFunc) {
         this->rd = inst_break[1];
-        this->rs1 = inst_break[2];
-        this->rs2 = inst_break[3];
-        rd = rd.substr(0, rd.find(','));
-        rs1 = rs1.substr(0, rs1.find(','));
-        rs2 = rs2.substr(0, rs2.find(','));
-
+        rd = tolowerString(rd.substr(0, rd.find(',')));
         rd = findRegister(rd);
-        rs1 = findRegister(rs1);
-        rs2 = findRegister(rs2);
 
-        this->func3 = modeAndFunc[1];
-        this->func7 = modeAndFunc[2];
+        this->imm = inst_break[2];
+        labelToImme(imm, 21);
+        reverse(imm.begin(), imm.end());
+        this->imm = imm[20] + imm.substr(1, 11) + imm[11] + imm.substr(12, 20);
+
         joinCodes();
     }
 
