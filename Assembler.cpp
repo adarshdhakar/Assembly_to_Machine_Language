@@ -385,8 +385,17 @@ public:
     functions["jal"] = {"J", "", ""};      // Jump and Link
 }
 
+    void removeBrackets(string& instruction){
+        int n = instruction.size();
+        for(int i = 0; i < n; i ++){
+            if(instruction[i] == '(' || instruction[i] == ')'){
+                instruction[i] = ' ';
+            }
+        }
+    }
+    string assemble(string& instruction){
+        removeBrackets(instruction);
 
-    string assemble(const string& instruction){
         vector<string> inst_break;
         stringstream s(instruction);
         string word;
