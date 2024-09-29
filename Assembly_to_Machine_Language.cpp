@@ -105,21 +105,21 @@ unordered_map<string, string> registers = {
 string hexDigitToBinary(char hexDigit) {
     switch(toupper(hexDigit)){
         case '0': return "0000";
-        case '1': return "0000";
-        case '2': return "0000";
-        case '3': return "0000";
-        case '4': return "0000";
-        case '5': return "0000";
-        case '6': return "0000";
-        case '7': return "0000";
-        case '8': return "0000";
-        case '9': return "0000";
-        case 'A': return "0000";
-        case 'B': return "0000";
-        case 'C': return "0000";
-        case 'D': return "0000";
-        case 'E': return "0000";
-        case 'F': return "0000";
+        case '1': return "0001";
+        case '2': return "0010";
+        case '3': return "0011";
+        case '4': return "0100";
+        case '5': return "0101";
+        case '6': return "0110";
+        case '7': return "0111";
+        case '8': return "1000";
+        case '9': return "1001";
+        case 'A': return "1010";
+        case 'B': return "1011";
+        case 'C': return "1100";
+        case 'D': return "1101";
+        case 'E': return "1110";
+        case 'F': return "1111";
         default: return "";
     }
 }
@@ -127,6 +127,36 @@ string hexDigitToBinary(char hexDigit) {
 class Instruction {
 public:
     string machineCode;
+    
+    char flip(char c) {
+        return (c == '0')? '1': '0';
+    }
+    
+    string twosComplementor(string bin){
+        int n = bin.length();
+        int i;
+        
+        string ones, twos;
+        ones = twos = "";
+        
+        for(i = 0; i < n; i++)
+            ones += flip(bin[i]);
+        
+        twos = ones;
+        for(i = n-1; i >= 0; i--){
+            if(ones[i] == '1')
+                twos[i] = '0';
+            else {
+                twos[i] = '1';
+                break;
+            }
+        }
+        
+        if(i == -1) 
+            twos = '1' + twos;
+            
+        return twos;
+    }
     
     string hexToBin(string hex){
         string binary = "";
@@ -138,7 +168,7 @@ public:
         }
         
         if(binary.length() > 32) {
-            binary = binary.substr(binary.length() - 32);
+            binary = binary.substr(binary.length() -32);
         }
         else if(binary.length() < 32){
             binary = string(32 - binary.length(), '0') + binary;
@@ -190,21 +220,14 @@ public:
     }
     
     void labelToImme(string &str, int n, int lineNum){
-        int labelIdx = -1;
-        if(labels.find(str) != labels.end()){
-            labelIdx = labels[str];
-        }
-
-        int offset = lineNum - labelIdx;
+        int offset = lineNum - labels[str]-1;
+        offset--;
         str = to_string(offset);
         
-        makeStrLenBin(str, n-1);
+        makeStrLenBin(str, n);
+        // cout << str << endl;
         if(offset > 0){
-            str = "0" + str;
             str = twosComplementor(str);
-        }
-        else {
-            str = "0" + str;
         }
     }
     
@@ -307,7 +330,7 @@ private:
     string opcode = "1100011", imm1, func3, rs1, rs2, imm2;
     
     void joinCodes() {
-        machineCode = imm2 + rs2 + rs1 + func3 + imm1 + opcode;
+        machineCode = imm2 + rs1 + rs2 + func3 + imm1 + opcode;
     }
     
 public:
@@ -322,15 +345,17 @@ public:
         rs1 = findRegister(rs1);
         
         string str = inst_break[3];
+        // cout << str << endl;
+        labelToImme(str, 12, lineNum);
+        // cout << str << endl;
+        this->imm2 = str.substr(0, 7);
+        this->imm1 = str.substr(7, 12);
+        // cout << this->imm2 << " " << this-> imm1 << endl;
         
-        // labelToImme(str, 12, lineNum);
-        // this->imm2 = str.substr(0, 7);
-        // this->imm1 = str.substr(7, 12);
-        
-        labelToImme(str,  13, lineNum);
-        str.erase(str.size() - 1);
-        this->imm2 = str[0] + str.substr(2, 6);
-        this->imm1 = str.substr(8, 4) + str[1];
+        // labelToImme(str,  13, lineNum);
+        // str.erase(str.size() - 1);
+        // this->imm2 = str[0] + str.substr(2, 6);
+        // this->imm1 = str.substr(8, 4) + str[1];
         
         this->func3 = modeAndFunc[1];
         joinCodes();
@@ -373,50 +398,17 @@ public:
         rd = tolowerString(rd.substr(0, rd.find(',')));
         rd = findRegister(rd);
         
-        // this->imm = inst_break[2];
-        // labelToImme(imm, 20, lineNum);
+        this->imm = inst_break[2];
+        labelToImme(imm, 20, lineNum);
         
-        labelToImme(imm, 21, lineNum);
-        imm.erase(imm.size() - 1);
-        string str = imm;
-        imm = str[0] + str.substr(10, 10) + str[9] + str.substr(1,8);
+        // labelToImme(imm, 21, lineNum);
+        // imm.erase(imm.size() - 1);
+        // string str = imm;
+        // imm = str[0] + str.substr(10, 10) + str[9] + str.substr(1,8);
         
         joinCodes();
     }
 };
-
-char flip(char c) {
-    return (c == '0')? '1': '0';
-} 
-  
-string twosComplementor(string bin) 
-{ 
-    int n = bin.length(); 
-    int i; 
-  
-    string ones, twos; 
-    ones = twos = ""; 
-  
-    for (i = 0; i < n; i++) 
-        ones += flip(bin[i]); 
-  
-    twos = ones; 
-    for (i = n - 1; i >= 0; i--) 
-    { 
-        if (ones[i] == '1') 
-            twos[i] = '0'; 
-        else
-        { 
-            twos[i] = '1'; 
-            break; 
-        } 
-    } 
-
-    if (i == -1) 
-        twos = '1' + twos; 
-  
-    return twos;
-} 
 
 class Assembler {
 private:
@@ -522,8 +514,8 @@ void readCodeAndFindLabel(vector<string>& assemblyCode){
 
 vector<string> convertToMachineCode(Assembler assembler, vector<string>& assemblyCode){
     vector<string> machineCode;
-    ofstream fout;
-    fout.open("MachineCode.txt");
+    // ofstream fout;
+    // fout.open("MachineCode.txt");
     
     int count = 0;
     string line;
@@ -532,12 +524,12 @@ vector<string> convertToMachineCode(Assembler assembler, vector<string>& assembl
         if(line.find(" ") != string::npos){
             string str = assembler.assemble(line, i);
             machineCode.push_back(str);
-            fout << str << endl;
+            // fout << str << endl;
         }
         count ++;
     }
     
-    fout.close();
+    // fout.close();
     return machineCode;
 }
 
@@ -549,9 +541,27 @@ void printCodes(vector<string>& code){
 }
 
 int main() {
-    vector<string> assemblyCode;
+    vector<string> assemblyCode = {
+        "add x2, x1, x2",
+        "damn:",
+        "addi x5, x6, 1",
+        "hello:",
+        "lui x3, 50",
+        "sw x4, 10(x3)",
+        "jal x7, hello",
+        "beq x8, x9, damn"
+    };
+    // readCodeAndFindLabel(assemblyCode);
+    int count = 0;
+    for(int i = 0; i < assemblyCode.size(); i++){
+        string line = assemblyCode[i];
+        if(line.find(" ") == string::npos){
+            line.pop_back();
+            labels[line] = count;
+        }
+        count ++;
+    }
     
-    readCodeAndFindLabel(assemblyCode);
     Assembler assembler;
     vector<string> machineCode = convertToMachineCode(assembler, assemblyCode);
     
