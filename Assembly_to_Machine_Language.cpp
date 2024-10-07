@@ -241,6 +241,7 @@ private:
     string opcode = "0110011", rd, func3, rs1, rs2, func7;
     
     void joinCodes() {
+        cout << func7 << " " << rs2 << " " << rs1 << " " << func3 << " " << rd << " " << opcode << endl;
         machineCode = func7 + rs2 + rs1 + func3 + rd + opcode;
     }
     
@@ -544,12 +545,13 @@ int main() {
     vector<string> assemblyCode = {
         "add x2, x1, x2",
         "damn:",
-        "addi x5, x6, 1",
+        "addi x5, x6, 10",
         "hello:",
         "lui x3, 50",
         "sw x4, 10(x3)",
         "jal x7, hello",
-        "beq x8, x9, damn"
+        "beq x10, x11, damn",
+        "lw x5, 10(x4)"
     };
     // readCodeAndFindLabel(assemblyCode);
     int count = 0;
