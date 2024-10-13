@@ -222,12 +222,18 @@ public:
     void labelToImme(string &str, int n, int lineNum){
         int offset = lineNum - labels[str]-1;
         offset--;
-        str = to_string(offset);
         
-        makeStrLenBin(str, n);
         // cout << str << endl;
         if(offset > 0){
+            str = to_string(offset);
+            makeStrLenBin(str, n);
             str = twosComplementor(str);
+        }
+        else {
+            offset = -1*offset;
+            offset--;
+            str = to_string(offset);
+            makeStrLenBin(str, n);
         }
     }
     
@@ -543,15 +549,24 @@ void printCodes(vector<string>& code){
 
 int main() {
     vector<string> assemblyCode = {
-        "add x2, x1, x2",
-        "damn:",
-        "addi x5, x6, 10",
-        "hello:",
-        "lui x3, 50",
-        "sw x4, 10(x3)",
-        "jal x7, hello",
-        "beq x10, x11, damn",
-        "lw x5, 10(x4)"
+        // "add x2, x1, x2",
+        // "damn:",
+        // "addi x5, x6, 10",
+        // "hello:",
+        // "lui x3, 50",
+        // "sw x4, 10(x3)",
+        // "jal x7, hello",
+        // "beq x10, x11, damn",
+        // "lw x5, 10(x4)"
+        "lw x0, 0(x6)", //int n = 10
+        "lw x1, 0(x7)", //int i = 1
+        "lw x2, 0(x8)", //int sum = 0
+        "sum_loop:",
+        "add x2, x2, x1",
+        "addi x1, x1, 1",
+        "beq x1, x0, done",
+        "jal x3, sum_loop",
+        "done:"
     };
     // readCodeAndFindLabel(assemblyCode);
     int count = 0;
@@ -563,7 +578,10 @@ int main() {
         }
         count ++;
     }
-    
+    for(auto& label : labels){
+        cout << label.first << " " << label.second << endl;
+    }
+
     Assembler assembler;
     vector<string> machineCode = convertToMachineCode(assembler, assemblyCode);
     
