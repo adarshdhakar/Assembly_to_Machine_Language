@@ -558,15 +558,16 @@ int main() {
         // "jal x7, hello",
         // "beq x10, x11, damn",
         // "lw x5, 10(x4)"
-        "lw x0, 0(x6)", //int n = 10
-        "lw x1, 0(x7)", //int i = 1
+        "lw x0, 11(x6)", //int n = 10
+        "lw x1, 1(x7)", //int i = 1
         "lw x2, 0(x8)", //int sum = 0
         "sum_loop:",
         "add x2, x2, x1",
         "addi x1, x1, 1",
         "beq x1, x0, done",
         "jal x3, sum_loop",
-        "done:"
+        "done:",
+        "sw x2, 0(x31)"
     };
     // readCodeAndFindLabel(assemblyCode);
     int count = 0;
